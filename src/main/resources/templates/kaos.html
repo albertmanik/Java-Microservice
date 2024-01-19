@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+    
+</head>
+<body>
+
+<nav class="navbar navbar-expand-lg navbar-light bg-light">
+    <a class="navbar-brand" href="#">Dashboard</a>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav">
+            <li class="nav-item">
+                <a class="nav-link" th:href="@{/booking-ruangan}">Ruangan</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" th:href="@{/request-surat}">Surat</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" th:href="@{/requestijinkeluar}">IK</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" th:href="@{/requestijinbermalam}">IB</a>
+            </li>
+        </ul>
+        <ul class="navbar-nav ml-auto">
+		    <li class="nav-item">
+		        <!-- Menampilkan link Login jika tidak ada userId dalam sesi -->
+		        <a th:unless="${session.userId}" th:href="@{/login}">Login</a>
+		    </li>
+		    <li class="nav-item" th:if="${session.userId}">
+		        <!-- Menampilkan link Logout jika ada userId dalam sesi -->
+		        <form th:action="@{/logout}" method="post">
+						<input type="submit" value="Logout" class="btn btn-primary d-sm-inline-block d-none">
+					</form>
+		    </li>
+		</ul>
+
+    </div>
+</nav>
+
+<div class="container mt-5">
+    <h2>Pembelian Kaos</h2>
+<div th:if="${session.userId}">
+    <!-- Form for adding new booking -->
+    <div class="card mt-4">
+        <div class="card-header">
+            Form Pembelian
+        </div>
+        <div class="card-body">
+            <form>
+	            	<div class="form-group">
+	                    <label for="deskripsi">Akun Pengirim</label>
+	                    <input type="text" class="form-control" id="akunPengirim" required>
+	                </div>
+	                <div class="form-group">
+	                    <label for="waktuBerangkat">Jenis Pembayaran</label>
+	                    <input type="text" class="form-control" id="jenisPembayaran" required>
+	                </div>
+	                <div class="form-group">
+	                    <label for="waktuKembali">Total Pembayaran</label>
+	                    <input type="text" class="form-control" id="total" required>
+	                </div>
+	                <button type="submit" class="btn btn-primary" id="submitButton">Beli</button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.1/dist/umd/popper.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+<script>
+	function getProductIdFromUrl() {
+        var url = window.location.href;
+        var matches = url.match(/\/orderproduct\/(\d+)/);
+        if (matches && matches.length > 1) {
+            return parseInt(matches[1]);
+        }
+        return null;
+    }
+
+    // Fungsi untuk menampilkan ID produk di halaman
+    function displayProductId() {
+        var productId = getProductIdFromUrl();
+        if (productId !== null) {
+            // Ganti elemen dengan ID "productId" dengan ID produk yang ditemukan
+            document.getElementById("productId").innerText = productId;
+        } else {
+            // Handle jika ID produk tidak ditemukan
+            document.getElementById("productId").innerText = "ID Produk tidak ditemukan";
+        }
+    }
+
+    // Panggil fungsi displayProductId saat halaman dimuat
+    window.onload = function() {
+        displayProductId();
+    };
+    $(document).ready(function() {
+        $("submitButton").click(function(event) {
+            event.preventDefault(); // Prevent the default form submission
+
+            // Mendapatkan userId dari sesi (Thymeleaf sintaks)
+            var userId = [[${session.userId}]]; // Implementasi fungsi ini sesuai kebutuhan Anda
+		
+			var produkId = getProductIdFromUrl();
+            var date = new Date();
+            var userModel = {
+                "user": {
+                    "id": userId // Atur id_mahasiswa sesuai dengan userId
+                },
+                 "produk": {
+                    "id": produkId // Atur id_produk sesuai dengan produkId
+                },
+                "jenisPembayaran": $("#jenisPembayaran").val(),
+                "akunPengirim": $("#akunPengirim").val(),
+                "total": $("#total").val(),
+            };
+            var requestJSON = JSON.stringify(userModel);
+            $.ajax({
+                type: "POST",
+                url: "http://localhost:8080/order",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                data: requestJSON,
+                success: function(data) {
+                    alert("Pesanan berhasil direquest");
+                    window.location.href = "http://localhost:8080/dashboard"; // Redirect to index2
+                }
+            });
+        });
+    });
+	
+</script>
+</body>
+</html>

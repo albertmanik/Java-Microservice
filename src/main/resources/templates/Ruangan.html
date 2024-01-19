@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Booking Ruangan Management</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+</head>
+<body>
+
+<div class="container mt-5">
+    <h2>Booking Ruangan Management</h2>
+
+    <!-- Form for adding new booking -->
+    <div class="card mt-4">
+        <div class="card-header">
+            Add New Booking
+        </div>
+        <div class="card-body">
+            <form th:action="@{/bookings/add}" th:object="${newBooking}" method="post">
+                <div class="form-group">
+                    <label for="no_ruangan">Room Number:</label>
+                    <input type="text" class="form-control" id="no_ruangan" th:field="*{no_ruangan}" required>
+                </div>
+                <div class="form-group">
+                    <label for="deskripsi">Description:</label>
+                    <input type="text" class="form-control" id="deskripsi" th:field="*{deskripsi}" required>
+                </div>
+                <div class="form-group">
+                    <label for="start_booking">Start Booking:</label>
+                    <input type="datetime-local" class="form-control" id="start_booking" th:field="*{start_booking}" required>
+                </div>
+                <div class="form-group">
+                    <label for="end_booking">End Booking:</label>
+                    <input type="datetime-local" class="form-control" id="end_booking" th:field="*{end_booking}" required>
+                </div>
+                <div class="form-group">
+                    <label for="status">Status:</label>
+                    <input type="text" class="form-control" id="status" th:field="*{status}" required>
+                </div>
+                <button type="submit" class="btn btn-primary">Add Booking</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- List of bookings -->
+    <div class="card mt-4">
+        <div class="card-header">
+            List of Bookings
+        </div>
+        <div class="card-body">
+            <table class="table">
+                <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Room Number</th>
+                    <th>Description</th>
+                    <th>Start Booking</th>
+                    <th>End Booking</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="booking : ${bookings}">
+                    <td th:text="${booking.id}"></td>
+                    <td th:text="${booking.no_ruangan}"></td>
+                    <td th:text="${booking.deskripsi}"></td>
+                    <td th:text="${booking.start_booking}"></td>
+                    <td th:text="${booking.end_booking}"></td>
+                    <td th:text="${booking.status}"></td>
+                    <td>
+                        <a th:href="@{/bookings/{id}/edit(id=${booking.id})}" class="btn btn-warning btn-sm">Edit</a>
+                        <a th:href="@{/bookings/{id}/delete(id=${booking.id})}" class="btn btn-danger btn-sm">Delete</a>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.1/dist/umd/popper.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+</body>
+</html>

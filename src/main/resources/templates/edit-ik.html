@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+    
+</head>
+<body>
+
+<nav class="navbar navbar-expand-lg navbar-light bg-light">
+    <a class="navbar-brand" href="#">Dashboard</a>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav">
+            <li class="nav-item">
+                <a class="nav-link" th:href="@{/booking-ruangan}">Ruangan</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" th:href="@{/admin-surat}">Surat</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" th:href="@{/admin-ik}">IK</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" th:href="@{/admin-ib}">IB</a>
+            </li>
+        </ul>
+        <ul class="navbar-nav ml-auto">
+		    <li class="nav-item">
+		        <!-- Menampilkan link Login jika tidak ada userId dalam sesi -->
+		        <a th:unless="${session.userId}" th:href="@{/login}">Login</a>
+		    </li>
+		    <li class="nav-item" th:if="${session.userId}">
+		        <!-- Menampilkan link Logout jika ada userId dalam sesi -->
+		        <form th:action="@{/logout}" method="post">
+						<input type="submit" value="Logout" class="btn btn-primary d-sm-inline-block d-none">
+					</form>
+		    </li>
+		</ul>
+
+    </div>
+</nav>
+
+<div class="container mt-5">
+    <h2>Edit Request IK</h2>
+<div th:if="${session.userId}">
+    <!-- Form for adding new booking -->
+    <div class="card mt-4">
+        <div class="card-header">
+            Add New Request
+        </div>
+        <div class="card-body">
+            <form th:object="${ijinkeluar}">
+            		<input type="hidden" class="form-control" th:field="*{id}" id="id">
+					<input type="hidden" class="form-control" th:field="*{user}" id="user">
+	            	<div class="form-group">
+	                    <label for="deskripsi">Nama Mahasiswa</label>
+	                    <input type="text" class="form-control" th:field="*{user.username}" id="username" required>
+	                </div>
+	                <div class="form-group">
+	                    <label for="waktuBerangkat">Waktu Berangkat</label>
+	                    <input type="datetime-local" class="form-control" th:field="*{waktuBerangkat}" id="waktu_berangkat"required>
+	                </div>
+	                <div class="form-group">
+	                    <label for="waktuKembali">Waktu Kembali</label>
+	                    <input type="datetime-local" class="form-control" th:field="*{waktuKembali}" id="waktu_kembali" required>
+	                </div>
+	                <div class="form-group">
+	                    <label for="keperluan">Keperluan</label>
+	                    <input type="text" class="form-control" th:field="*{keperluan}" id="keperluan" required>
+	                </div>
+	                <div class="form-group">
+		                <label for="status">Status</label>
+		                <select class="form-control" id="status">
+		                	<option value="Approved">Approved</option>
+		                    <option value="Pending">Pending</option>
+		                    <option value="Denied">Denied</option>
+		                </select>
+		            </div>
+	                <button type="submit" class="btn btn-primary">Update IK</button>
+	                <a th:href="@{/admin-ik}" class="btn btn-danger">Kembali</a>
+            </form>
+        </div>
+    </div>
+   </div>
+
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.1/dist/umd/popper.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+<script>
+    $(document).ready(function() {
+	    $("button").click(function() {
+	        var date = new Date();
+	        var userModel = {
+	            "user": $("#user").val(),
+	            "id": $("#id").val(),
+	            "waktuBerangkat": date.toISOString(), // Format the date to ISO string
+	            "waktuKembali": date.toISOString(), // Format the date to ISO string
+	            "keperluan": $("#keperluan").val(),
+	            "status": $("#status").val()
+	        };
+	        var requestJSON = JSON.stringify(userModel);
+	        $.ajax({
+	            type: "PUT",
+	            url: "http://localhost:8080/ijinkeluar/" + $("#id").val(),
+	            headers: {
+	                "Content-Type": "application/json"
+	            },
+	            data: requestJSON,
+	            success: function(data) {
+	                alert("IK berhasil diedit");
+	                window.location.href = "http://localhost:8080/admin-ik";
+	            }
+	        });
+	    });
+	});
+</script>
+</body>
+</html>

@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+    
+</head>
+<body>
+
+<nav class="navbar navbar-expand-lg navbar-light bg-light">
+    <a class="navbar-brand" href="#">Dashboard</a>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav">
+            <li class="nav-item">
+                <a class="nav-link" th:href="@{/booking-ruangan}">Ruangan</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" th:href="@{/request-surat}">Surat</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" th:href="@{/requestijinkeluar}">IK</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" th:href="@{/requestijinbermalam}">IB</a>
+            </li>
+        </ul>
+        <ul class="navbar-nav ml-auto">
+		    <li class="nav-item">
+		        <!-- Menampilkan link Login jika tidak ada userId dalam sesi -->
+		        <a th:unless="${session.userId}" th:href="@{/login}">Login</a>
+		    </li>
+		    <li class="nav-item" th:if="${session.userId}">
+		        <!-- Menampilkan link Logout jika ada userId dalam sesi -->
+		        <form th:action="@{/logout}" method="post">
+						<input type="submit" value="Logout" class="btn btn-primary d-sm-inline-block d-none">
+					</form>
+		    </li>
+		</ul>
+
+    </div>
+</nav>
+
+<div class="container mt-5">
+    <h2>Request IK</h2>
+<div th:if="${session.userId}">
+    <!-- Form for adding new booking -->
+    <div class="card mt-4">
+        <div class="card-header">
+            Add New Request
+        </div>
+        <div class="card-body">
+            <form>
+	            	<div class="form-group">
+	                    <label for="deskripsi">Keperluan:</label>
+	                    <input type="text" class="form-control" id="keperluan"required>
+	                </div>
+	                <div class="form-group">
+	                    <label for="waktuBerangkat">Waktu Berangkat</label>
+	                    <input type="datetime-local" class="form-control" id="waktuBerangkat" required>
+	                </div>
+	                <div class="form-group">
+	                    <label for="waktuKembali">Waktu Kembali</label>
+	                    <input type="datetime-local" class="form-control" id="waktuKembali" required>
+	                </div>
+	                <button type="submit" class="btn btn-primary" id="submitButton">Add Request</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- List of request -->
+    <div class="card mt-4">
+        <div class="card-header">
+            List of Request
+        </div>
+        <div class="card-body">
+            <table class="table">
+                <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Nama Mahasiswa</th>
+                    <th>Keperluan</th>
+                    <th>Waktu Berangkat</th>
+                    <th>Waktu Kembali</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                </tr>
+                </thead>
+                <tbody id="viewDataIjinKeluar">
+                	<!-- Data will be appended here -->
+            	</tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.1/dist/umd/popper.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+<script>
+    $(document).ready(function() {
+	    $.getJSON("http://localhost:8080/ijinkeluar",
+			function(result){ 
+			var data='';
+			for (var i = 0; i < result.length; i++) {
+				data += "<tr><td>" + result[i].id + 
+						 "</td><td>" + result[i].user.username + 
+								"</td><td>" + result[i].keperluan + 
+								"</td><td>" + result[i].waktuBerangkat+ 
+								"</td><td>" + result[i].waktuKembali + 
+								"</td><td>" + result[i].status + 
+						"</td><td><form><button type='button' class='btn btn-danger' onclick='deleteData("+result[i].id+")'>Hapus</button></form>"+
+						"</td><td><form><button type='button' class='btn btn-primary' onclick='editData("+result[i].id+")'>Edit</button></form></td></tr>";
+			}
+			$("#viewDataIjinKeluar").append(data);
+			});
+			
+        $("#submitButton").click(function(event) {
+            event.preventDefault(); // Prevent the default form submission
+
+            // Mendapatkan userId dari sesi (Thymeleaf sintaks)
+            var userId = [[${session.userId}]]; // Implementasi fungsi ini sesuai kebutuhan Anda
+			
+            var date = new Date();
+            var userModel = {
+                "user": {
+                    "id": userId // Atur id_mahasiswa sesuai dengan userId
+                },
+                "keperluan": $("#keperluan").val(),
+                "waktuBerangkat": $("#waktuBerangkat").val(),
+                "waktuKembali": $("#waktuKembali").val(),
+                "status": "Pending"
+            };
+            var requestJSON = JSON.stringify(userModel);
+            $.ajax({
+                type: "POST",
+                url: "http://localhost:8080/ijinkeluar",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                data: requestJSON,
+                success: function(data) {
+                    alert("IK berhasil direquest");
+                    window.location.href = "http://localhost:8080/requestijinkeluar";
+                }
+            });
+        });
+    });
+    
+    function deleteData(id){
+			$.ajax({
+				url: "http://localhost:8080/ijinkeluar/"+id,
+				type: "DELETE",
+				success: function(result){
+					alert("IK berhasil dihapus");
+					window.location.reload();
+				}
+			});
+		}
+		function editData(id){
+			window.location.href = "http://localhost:8080/editijinkeluar/"+id;
+		}
+</script>
+</body>
+</html>
